@@ -1,0 +1,28 @@
+# Initial source registry for ANIMA dataset downloader.
+# The MVP uses this as documentation; plugin loading is implemented in Python CLI.
+
+sources:
+  - source_id: direct_url
+    display_name: Direct HTTP/HTTPS URLs
+    mode: auto_download
+    auth: optional_transient_headers
+
+  - source_id: local_import
+    display_name: Local files and folders
+    mode: import
+    auth: none
+
+  - source_id: huggingface_dataset
+    display_name: Hugging Face datasets
+    mode: auto_download
+    auth: optional_token
+
+  - source_id: wikimedia_commons
+    display_name: Wikimedia Commons
+    mode: auto_download
+    auth: none
+
+  - source_id: internet_archive
+    display_name: Internet Archive
+    mode: auto_download
+    auth: none

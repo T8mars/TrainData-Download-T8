@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>贞贞的训练集下载器</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">贞</div>
+          <div>
+            <h1>贞贞的训练集下载器</h1>
+            <p>本地研究数据下载器</p>
+          </div>
+        </div>
+        <a class="repo-link" href="https://github.com/T8mars/TrainData-Download-T8" target="_blank" rel="noreferrer">GitHub 项目</a>
+        <nav class="nav">
+          <button class="nav-item active" data-focus="downloadPanel">工作台</button>
+          <button class="nav-item" data-focus="presetGrid">推荐数据集</button>
+          <button class="nav-item" data-focus="sourceGrid">数据源</button>
+          <button class="nav-item" data-focus="jobsTable">任务</button>
+          <button class="nav-item" data-focus="assetsTable">素材</button>
+          <button class="nav-item" data-focus="activityLog">日志</button>
+        </nav>
+        <div class="quick-stats">
+          <span>素材总数</span>
+          <strong id="assetCount">0</strong>
+          <span>已完成任务</span>
+          <strong id="completedCount">0</strong>
+          <span>失败任务</span>
+          <strong id="failedCount">0</strong>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="path-summary">
+            <strong>当前下载目录</strong>
+            <span id="rootPath">加载中...</span>
+          </div>
+          <form id="rootForm" class="root-form">
+            <label>
+              <strong>自定义下载目录</strong>
+              <input id="rootInput" name="root" value="D:\zhenzhen-asset" placeholder="D:\zhenzhen-asset" required />
+            </label>
+            <button class="secondary-button" type="submit">应用</button>
+          </form>
+          <div>
+            <strong>Python</strong>
+            <span id="pythonInfo">加载中...</span>
+          </div>
+          <button id="refreshBtn" class="icon-button" title="刷新">刷新</button>
+        </header>
+
+        <section class="panel preset-panel">
+          <div class="panel-header compact">
+            <div>
+              <h2>推荐数据集</h2>
+              <p>先从小批量或单个分片开始下载，确认格式和速度后再扩大规模。</p>
+            </div>
+          </div>
+          <div class="preset-toolbar">
+            <input id="presetSearch" placeholder="搜索来源、用途、站点或关键词" />
+            <select id="presetGroup">
+              <option value="">全部分类</option>
+            </select>
+            <select id="presetType">
+              <option value="">全部来源类型</option>
+            </select>
+            <span id="presetCount">0 个来源</span>
+          </div>
+          <div class="preset-pager">
+            <button id="presetPrev" class="secondary-button" type="button">上一页</button>
+            <span id="presetPageInfo">第 1 页</span>
+            <button id="presetNext" class="secondary-button" type="button">下一页</button>
+          </div>
+          <div id="presetGrid" class="preset-grid"></div>
+        </section>
+
+        <section id="sourceGrid" class="source-grid">
+          <article class="source-card selected" data-tab="direct">
+            <span class="source-icon link">URL</span>
+            <h2>直链下载</h2>
+            <p>从 HTTP、HTTPS 或 file URL 下载单个文件。</p>
+          </article>
+          <article class="source-card" data-tab="hf">
+            <span class="source-icon hf">HF</span>
+            <h2>Hugging Face</h2>
+            <p>从数据集仓库拉取文件，可填写 token。</p>
+          </article>
+          <article class="source-card" data-tab="wikimedia">
+            <span class="source-icon wm">WM</span>
+            <h2>Wikimedia</h2>
+            <p>按搜索词或 Commons 分类采集文件。</p>
+          </article>
+          <article class="source-card" data-tab="ia">
+            <span class="source-icon ia">IA</span>
+            <h2>互联网档案馆</h2>
+            <p>按 item id 下载指定格式的档案文件。</p>
+          </article>
+          <article class="source-card" data-tab="iaSearch">
+            <span class="source-icon ia">IAS</span>
+            <h2>档案馆搜索</h2>
+            <p>按关键词搜索 item，再下载匹配文件。</p>
+          </article>
+          <article class="source-card" data-tab="kaggle">
+            <span class="source-icon kg">KG</span>
+            <h2>Kaggle</h2>
+            <p>按 owner/dataset 下载数据集 zip。</p>
+          </article>
+          <article class="source-card" data-tab="zenodo">
+            <span class="source-icon zn">ZN</span>
+            <h2>Zenodo</h2>
+            <p>按记录 ID 或搜索词下载科研数据。</p>
+          </article>
+          <article class="source-card" data-tab="github">
+            <span class="source-icon gh">GH</span>
+            <h2>GitHub Release</h2>
+            <p>下载 release assets 或源码包。</p>
+          </article>
+          <article class="source-card" data-tab="booru">
+            <span class="source-icon booru">BR</span>
+            <h2>Booru</h2>
+            <p>按标签搜索公开图片 URL。</p>
+          </article>
+          <article class="source-card" data-tab="local">
+            <span class="source-icon local">PC</span>
+            <h2>本地导入</h2>
+            <p>导入本地文件夹、单文件或压缩包。</p>
+          </article>
+        </section>
+
+        <section class="main-grid">
+          <div id="downloadPanel" class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>当前操作</h2>
+                <p id="activeHelp">先选择上方数据源，再开始下载、导入或解包。</p>
+              </div>
+              <div class="button-row">
+                <button id="preflightBtn" class="secondary-button" type="button">预检当前参数</button>
+                <button id="initBtn" class="secondary-button" type="button">初始化工作区</button>
+              </div>
+            </div>
+
+            <form id="directForm" class="action-form active">
+              <label>URL<input name="url" placeholder="https://example.com/file.zip" required /></label>
+              <div class="two-col">
+                <label>文件名<input name="filename" placeholder="留空则自动识别" /></label>
+                <label>请求头<input name="header" placeholder="Authorization=Bearer token" /></label>
+              </div>
+              <button class="primary-button" type="submit">开始下载</button>
+            </form>
+
+            <form id="hfForm" class="action-form">
+              <label>数据集仓库<input name="repo_id" placeholder="deepghs/anime-bg" required /></label>
+              <div class="two-col">
+                <label>文件匹配规则<input name="include" placeholder="*.tar" /></label>
+                <label>最多文件数<input name="max_files" type="number" min="1" placeholder="1" /></label>
+              </div>
+              <label>HF Token<input name="token" placeholder="hf_...（受限数据集必填）" /></label>
+              <button class="primary-button" type="submit">下载数据集文件</button>
+            </form>
+
+            <form id="wikimediaForm" class="action-form">
+              <div class="segmented">
+                <label><input type="radio" name="mode" value="category" checked /> 分类</label>
+                <label><input type="radio" name="mode" value="search" /> 搜索</label>
+              </div>
+              <label>关键词<input name="query" placeholder="Katsushika Hokusai" required /></label>
+              <div class="two-col">
+                <label>API 返回上限<input name="limit" type="number" min="1" value="50" /></label>
+                <label>最多文件数<input name="max_files" type="number" min="1" placeholder="5" /></label>
+              </div>
+              <button class="primary-button" type="submit">下载 Commons 文件</button>
+            </form>
+
+            <form id="iaForm" class="action-form">
+              <label>Item ID<input name="item_id" placeholder="hokusaimanga04kats" required /></label>
+              <div class="two-col">
+                <label>文件匹配规则<input name="include" placeholder="*.pdf" /></label>
+                <label>最多文件数<input name="max_files" type="number" min="1" placeholder="1" /></label>
+              </div>
+              <button class="primary-button" type="submit">下载档案文件</button>
+            </form>
+
+            <form id="iaSearchForm" class="action-form">
+              <label>搜索关键词<input name="query" placeholder='manga mediatype:texts' required /></label>
+              <div class="two-col">
+                <label>文件匹配规则<input name="include" placeholder="*.pdf,*.zip,*.cbz" /></label>
+                <label>最多条目数<input name="max_items" type="number" min="1" value="1" /></label>
+              </div>
+              <label>每个条目最多文件数<input name="max_files_per_item" type="number" min="1" value="1" /></label>
+              <button class="primary-button" type="submit">搜索并下载</button>
+            </form>
+
+            <form id="kaggleForm" class="action-form">
+              <label>数据集 Slug<input name="dataset" placeholder="splcher/animefacedataset" required /></label>
+              <div class="two-col">
+                <label>保存文件名<input name="filename" placeholder="留空自动生成 zip" /></label>
+                <label>Kaggle 用户名<input name="username" placeholder="可选，默认读环境变量或 kaggle.json" /></label>
+              </div>
+              <label>Kaggle Key<input name="key" placeholder="可选，默认读环境变量或 kaggle.json" /></label>
+              <button class="primary-button" type="submit">下载 Kaggle 数据集</button>
+            </form>
+
+            <form id="zenodoForm" class="action-form">
+              <div class="two-col">
+                <label>Record ID<input name="record_id" placeholder="留空则使用搜索词" /></label>
+                <label>搜索词<input name="query" placeholder="anime manga" /></label>
+              </div>
+              <div class="two-col">
+                <label>文件匹配规则<input name="include" placeholder="*.zip,*.tar,*.jpg,*.png,*.pdf" /></label>
+                <label>最多文件数<input name="max_files" type="number" min="1" value="1" /></label>
+              </div>
+              <label>最多记录数<input name="max_records" type="number" min="1" value="1" /></label>
+              <button class="primary-button" type="submit">下载 Zenodo 文件</button>
+            </form>
+
+            <form id="githubForm" class="action-form">
+              <label>仓库<input name="repo" placeholder="owner/repo" required /></label>
+              <div class="two-col">
+                <label>Release 标签<input name="release" value="latest" placeholder="latest 或 v1.0.0" /></label>
+                <label>文件匹配规则<input name="include" placeholder="*.zip,*.tar.gz,*.7z" /></label>
+              </div>
+              <div class="two-col">
+                <label>最多文件数<input name="max_files" type="number" min="1" value="1" /></label>
+                <label>Token<input name="token" placeholder="可选 GITHUB_TOKEN" /></label>
+              </div>
+              <button class="primary-button" type="submit">下载 Release 文件</button>
+            </form>
+
+            <form id="booruForm" class="action-form">
+              <label>站点
+                <select name="site">
+                  <option value="safebooru">Safebooru</option>
+                  <option value="gelbooru">Gelbooru</option>
+                  <option value="danbooru">Danbooru</option>
+                  <option value="konachan">Konachan</option>
+                  <option value="yandere">Yande.re</option>
+                </select>
+              </label>
+              <label>标签<input name="tags" placeholder="anime_girl rating:general" required /></label>
+              <div class="two-col">
+                <label>API 返回上限<input name="limit" type="number" min="1" value="20" /></label>
+                <label>最多文件数<input name="max_files" type="number" min="1" value="3" /></label>
+              </div>
+              <button class="primary-button" type="submit">下载 Booru 图片</button>
+            </form>
+
+            <form id="localForm" class="action-form">
+              <label>本地路径<input name="path" placeholder="E:\dataset\images 或 E:\dataset\pack.zip" required /></label>
+              <div class="button-row">
+                <button class="primary-button" data-mode="import" type="submit">导入路径</button>
+                <button class="secondary-button" data-mode="extract" type="submit">解包压缩包</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="panel overview-panel">
+            <h2>概览</h2>
+            <div class="metrics">
+              <div><span>运行中</span><strong id="runningCount">0</strong></div>
+              <div><span>已下载</span><strong id="downloadedCount">0</strong></div>
+              <div><span>失败</span><strong id="overviewFailed">0</strong></div>
+            </div>
+            <div id="toast" class="toast">就绪</div>
+            <div id="preflightBox" class="preflight-box">预检结果会显示在这里。</div>
+          </div>
+        </section>
+
+        <section class="table-grid">
+          <div class="panel">
+            <div class="panel-header compact">
+              <h2>最近任务</h2>
+            </div>
+            <div class="table-wrap">
+              <table id="jobsTable">
+                <thead><tr><th>状态</th><th>来源</th><th>目标文件</th><th>错误</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-header compact">
+              <h2>最近素材</h2>
+            </div>
+            <div class="table-wrap">
+              <table id="assetsTable">
+                <thead><tr><th>状态</th><th>时间</th><th>来源</th><th>路径</th><th>SHA256</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header compact">
+            <h2>活动日志</h2>
+            <button id="clearActivity" class="secondary-button">清空</button>
+          </div>
+          <pre id="activityLog" class="activity-log"></pre>
+        </section>
+      </main>
+    </div>
+    <script src="/app.js"></script>
+  </body>
+</html>

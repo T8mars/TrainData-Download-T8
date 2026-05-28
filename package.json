@@ -1,0 +1,50 @@
+{
+  "name": "zhenzhen-dataset-downloader",
+  "version": "0.1.0",
+  "description": "贞贞的训练集下载器桌面版",
+  "main": "electron/main.js",
+  "private": true,
+  "author": "Zhenzhen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/T8mars/TrainData-Download-T8.git"
+  },
+  "homepage": "https://github.com/T8mars/TrainData-Download-T8",
+  "bugs": {
+    "url": "https://github.com/T8mars/TrainData-Download-T8/issues"
+  },
+  "scripts": {
+    "backend:build": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File tools/build_backend.ps1",
+    "build": "npm run backend:build",
+    "dist": "npm run backend:build && electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "local.zhenzhen.dataset-downloader",
+    "productName": "贞贞的训练集下载器",
+    "directories": {
+      "output": "dist_electron"
+    },
+    "files": [
+      "electron/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "dist_backend/zhenzhen-backend.exe",
+        "to": "backend/zhenzhen-backend.exe"
+      }
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "Zhenzhen-Dataset-Downloader-${version}-portable.${ext}"
+    }
+  }
+}

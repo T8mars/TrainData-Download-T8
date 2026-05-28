@@ -1,0 +1,62 @@
+[
+  {
+    "id": "direct",
+    "label": "直链",
+    "description": "HTTP/HTTPS/file URL 单文件或清单下载。",
+    "auth": "可选请求头"
+  },
+  {
+    "id": "hf",
+    "label": "Hugging Face",
+    "description": "按数据集仓库列文件、预检和下载。",
+    "auth": "可选 HF_TOKEN"
+  },
+  {
+    "id": "wikimedia",
+    "label": "Wikimedia",
+    "description": "按 Commons 分类或搜索词下载开放媒体文件。",
+    "auth": "无"
+  },
+  {
+    "id": "ia",
+    "label": "Internet Archive Item",
+    "description": "按 archive.org item id 下载匹配文件。",
+    "auth": "无"
+  },
+  {
+    "id": "iaSearch",
+    "label": "Internet Archive 搜索",
+    "description": "按搜索词查找 item，再下载匹配文件。",
+    "auth": "无"
+  },
+  {
+    "id": "kaggle",
+    "label": "Kaggle",
+    "description": "按 owner/dataset slug 下载公开或已授权数据集 zip。",
+    "auth": "需要 kaggle.json 或 KAGGLE_USERNAME/KAGGLE_KEY"
+  },
+  {
+    "id": "zenodo",
+    "label": "Zenodo",
+    "description": "按 record id 或搜索词下载科研记录文件。",
+    "auth": "公开记录无 token"
+  },
+  {
+    "id": "github",
+    "label": "GitHub Releases",
+    "description": "下载 release assets 或仓库源码归档。",
+    "auth": "可选 GITHUB_TOKEN"
+  },
+  {
+    "id": "booru",
+    "label": "Booru",
+    "description": "Danbooru/Gelbooru/Safebooru/Konachan/Yande.re 标签搜索下载。",
+    "auth": "公开搜索，无反爬绕过"
+  },
+  {
+    "id": "local",
+    "label": "本地导入",
+    "description": "导入本地文件、目录或压缩包。",
+    "auth": "无"
+  }
+]

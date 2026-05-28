@@ -1,0 +1,21 @@
+[project]
+name = "anima-dataset-studio"
+version = "0.1.0"
+description = "贞贞的训练集下载器：面向 anime 模型研究的下载优先数据集收集工具。"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/T8mars/TrainData-Download-T8"
+Repository = "https://github.com/T8mars/TrainData-Download-T8"
+Issues = "https://github.com/T8mars/TrainData-Download-T8/issues"
+
+[project.scripts]
+anima-dataset = "anima_dataset.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

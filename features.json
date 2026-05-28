@@ -1,0 +1,191 @@
+{
+  "project": {
+    "title": "贞贞的训练集下载器",
+    "packageName": "anima-dataset-studio",
+    "version": "0.1.0",
+    "workspace": "E:\\manga-resource",
+    "repositoryUrl": "https://github.com/T8mars/TrainData-Download-T8",
+    "defaultDownloadRoot": "D:\\zhenzhen-asset",
+    "packagedDefaultDownloadRoot": "%USERPROFILE%\\Documents\\ZhenzhenTrainData",
+    "language": "zh-CN",
+    "purpose": "面向 anime / 漫画训练数据准备的本地中文下载器，优先支持预检、小批量下载、来源记录和哈希校验。"
+  },
+  "runtime": {
+    "backend": "Python 标准库 HTTP 服务",
+    "frontend": "静态 HTML/CSS/JavaScript",
+    "pythonPreferred": "C:\\ProgramData\\anaconda3\\python.exe",
+    "dependencies": [],
+    "pythonPathRequired": "src"
+  },
+  "entrypoints": {
+    "recommendedLauncher": "启动贞贞的训练集下载器.vbs",
+    "backupLauncher": "launch.bat",
+    "guiPowerShell": "tools\\launch_gui.ps1",
+    "electronMain": "electron\\main.js",
+    "packagedPortable": "dist_electron\\Zhenzhen-Dataset-Downloader-0.1.0-portable.exe",
+    "packagedBackend": "dist_backend\\zhenzhen-backend.exe",
+    "cliMenu": "launch_cli.bat",
+    "guiModule": "anima_dataset.gui_server",
+    "cliModule": "anima_dataset.cli"
+  },
+  "ui": {
+    "title": "贞贞的训练集下载器",
+    "defaultUrl": "http://127.0.0.1:8422/",
+    "recommendedCardsPerPage": 9,
+    "desktopCardGrid": "3 columns x 3 rows",
+    "downloadRootEditable": true,
+    "defaultDownloadRootVisible": true,
+    "repositoryLinkVisible": true,
+    "repositoryLink": "https://github.com/T8mars/TrainData-Download-T8",
+    "activityLog": true,
+    "preflightBox": true,
+    "recentAssetColumns": ["状态", "时间", "来源", "路径", "SHA256"]
+  },
+  "catalog": {
+    "loader": "src\\anima_dataset\\catalog.py",
+    "providerFile": "sources\\providers\\providers.json",
+    "baseCatalog": "sources\\catalogs\\base.json",
+    "generatorCatalog": "sources\\catalogs\\generators.json",
+    "lastVerifiedCount": 1472,
+    "providerIds": [
+      "direct",
+      "hf",
+      "wikimedia",
+      "ia",
+      "iaSearch",
+      "kaggle",
+      "zenodo",
+      "github",
+      "booru",
+      "local"
+    ]
+  },
+  "providers": [
+    {
+      "id": "direct",
+      "label": "直链",
+      "endpoint": "/api/download-url",
+      "preflight": true,
+      "auth": "可选临时请求头",
+      "downloadBehavior": "HTTP/HTTPS/file 单文件下载，支持断点续传、重试、哈希记录。",
+      "knownFailureModes": ["URL 失效", "站点拒绝 HEAD 或 Range", "需要用户提供授权请求头"]
+    },
+    {
+      "id": "hf",
+      "label": "Hugging Face",
+      "endpoint": "/api/hf",
+      "preflight": true,
+      "auth": "可选 HF_TOKEN 或表单 token",
+      "downloadBehavior": "读取 dataset tree，按 glob 规则下载匹配文件。",
+      "knownFailureModes": ["私有或 gated 数据集需要 token", "大 tar 下载时间长", "仓库默认分支不是 main 时需要后续扩展 revision 参数"]
+    },
+    {
+      "id": "wikimedia",
+      "label": "Wikimedia Commons",
+      "endpoint": "/api/wikimedia",
+      "preflight": true,
+      "auth": "无",
+      "downloadBehavior": "按 Commons 分类或搜索词枚举文件 URL，小批量下载并轻量限速。",
+      "knownFailureModes": ["搜索词无结果", "分类名不准确", "Commons 临时限速或文件热链失败"]
+    },
+    {
+      "id": "ia",
+      "label": "Internet Archive Item",
+      "endpoint": "/api/ia",
+      "preflight": true,
+      "auth": "无",
+      "downloadBehavior": "读取 item metadata，按 include glob 下载匹配文件。",
+      "knownFailureModes": ["item id 不存在", "include 规则不匹配", "单个文件过大或 archive.org 临时限速"]
+    },
+    {
+      "id": "iaSearch",
+      "label": "Internet Archive 搜索",
+      "endpoint": "/api/ia-search",
+      "preflight": true,
+      "auth": "无",
+      "downloadBehavior": "先搜索候选 item，再逐项查找可下载文件。",
+      "knownFailureModes": ["搜索结果有条目但无匹配文件", "关键词过宽导致候选质量不稳定"]
+    },
+    {
+      "id": "kaggle",
+      "label": "Kaggle",
+      "endpoint": "/api/kaggle",
+      "preflight": true,
+      "auth": "需要 kaggle.json 或 KAGGLE_USERNAME/KAGGLE_KEY",
+      "downloadBehavior": "调用 Kaggle API 下载 dataset zip。",
+      "knownFailureModes": ["本机未配置凭据", "数据集需要额外同意条款", "Kaggle API 限流"]
+    },
+    {
+      "id": "zenodo",
+      "label": "Zenodo",
+      "endpoint": "/api/zenodo",
+      "preflight": true,
+      "auth": "无",
+      "downloadBehavior": "按 record id 或搜索词枚举公开记录文件。",
+      "knownFailureModes": ["搜索结果不稳定", "include 规则不匹配", "记录文件体积较大"]
+    },
+    {
+      "id": "github",
+      "label": "GitHub Release",
+      "endpoint": "/api/github",
+      "preflight": true,
+      "auth": "可选 GITHUB_TOKEN 或表单 token",
+      "downloadBehavior": "先 latest release，再 release 列表，最后默认分支源码 zip/tar 兜底。",
+      "knownFailureModes": ["仓库不存在或拼写错误", "release asset 名称不匹配", "私有仓库需要 token"]
+    },
+    {
+      "id": "booru",
+      "label": "Booru",
+      "endpoint": "/api/booru",
+      "preflight": true,
+      "auth": "公开 API，无绕过",
+      "downloadBehavior": "按站点和 tags 搜索公开图片 URL，小批量下载；推荐目录默认生成 Safebooru 和 Danbooru。",
+      "knownFailureModes": ["站点限速", "标签无结果", "Gelbooru 当前公开 API 可能返回 401", "Konachan/Yande.re 默认标签命中不稳定，保留为手动表单测试"]
+    },
+    {
+      "id": "local",
+      "label": "本地导入",
+      "endpoint": "/api/import",
+      "preflight": false,
+      "auth": "无",
+      "downloadBehavior": "复制本地文件或递归导入文件夹，也可通过 /api/extract 解包。",
+      "knownFailureModes": ["路径不存在", "文件被占用", "磁盘空间不足"]
+    }
+  ],
+  "coreCapabilities": {
+    "resumeDownload": true,
+    "sha256Manifest": true,
+    "sqliteManifest": true,
+    "archiveExtract": ["zip", "cbz", "tar", "tgz"],
+    "downloadRetry": {
+      "attempts": 3,
+      "httpCodes": [429, 500, 502, 503, 504],
+      "honorsRetryAfter": true
+    },
+    "sourceArchiveFallbackForGitHub": true,
+    "customDownloadRoot": true,
+    "hiddenGuiLauncher": true,
+    "electronPortable": true,
+    "bundledPythonBackend": true,
+    "cleanPackagedUserDataRoot": true,
+    "releaseExcludesLocalLogsAndData": true
+  },
+  "validation": {
+    "compile": "& \"C:\\ProgramData\\anaconda3\\python.exe\" -m compileall src",
+    "catalog": "$env:PYTHONPATH=\"src\"; & \"C:\\ProgramData\\anaconda3\\python.exe\" -c \"from anima_dataset.catalog import load_catalog; d=load_catalog(); print(d['count']); print([p['id'] for p in d['providers']])\"",
+    "startGuiNoOpen": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File .\\tools\\launch_gui.ps1 -NoOpen",
+    "status": "Invoke-RestMethod http://127.0.0.1:8422/api/status",
+    "catalogApi": "Invoke-RestMethod http://127.0.0.1:8422/api/catalog",
+    "electronDist": "npm run dist",
+    "packagedPythonCheck": "运行 portable 后 /api/status 的 python 字段必须指向 zhenzhen-backend.exe",
+    "packagedRootCheck": "运行 portable 后 /api/status 的 root 默认应为用户文档目录下的 ZhenzhenTrainData，除非显式设置 ANIMA_DATASET_ROOT"
+  },
+  "knownBoundaries": [
+    "Electron 发布包只包含桌面壳、package.json 和 dist_backend/zhenzhen-backend.exe；data、logs、reports、manifests、node_modules 和构建中间产物不进入包。",
+    "源码/VBS 启动器默认下载目录仍是 D:\\zhenzhen-asset；Electron 打包版默认使用用户文档目录下的 ZhenzhenTrainData，避免开发机历史任务出现在用户首次启动界面。",
+    "项目不做 DRM、付费墙、验证码、登录墙或反爬绕过。",
+    "Kaggle、私有 Hugging Face、私有 GitHub 需要用户自己的合法凭据。",
+    "目录来源数量来自 JSON 生成器，实际可下载性需要预检和小批量下载验证。",
+    "旧文件名启动器保留兼容，新文档和主入口使用“贞贞的训练集下载器”。"
+  ]
+}
