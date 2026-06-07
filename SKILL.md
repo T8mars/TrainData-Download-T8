@@ -4,6 +4,78 @@
 
 GitHub 仓库：https://github.com/T8mars/TrainData-Download-T8
 
+## 多 Agent 协同入口
+
+新 Agent 接手前必须先读这些文件，不要只靠聊天摘要：
+
+1. `SKILL.md`：本文件是协同总入口，优先级最高。
+2. `features.json`：项目能力、端口、默认路径、provider 列表和验证命令。
+3. `README.md`：对外说明，尤其是用户可见启动、Key 配置和打包说明。
+4. `package.json`：Electron 打包入口、版本号、GitHub 仓库地址和 electron-builder 配置。
+5. `.gitignore`：确认 data、logs、reports、manifest、dist、node_modules 不会被提交或打包。
+6. 相关源码：后端先看 `src/anima_dataset/gui_server.py`，前端先看 `src/anima_dataset/web/`，打包先看 `electron/main.js` 和 `tools/build_backend.ps1`。
+
+协同工作默认约定：
+
+- 一个 Agent 只改自己负责的层，除非任务确实跨层。跨层修改要在最终说明里列出影响面。
+- 修改数据源目录优先改 JSON；只有接入全新站点 API 时才新增 Python 插件和 API 路由。
+- 前端改动必须保持中文界面、标题“贞贞的训练集下载器”、一页 9 个推荐数据集、最近素材表包含“时间”列。
+- 打包改动必须验证 portable 使用内置 `zhenzhen-backend.exe`，用户机器不应依赖系统 Python。
+- 不要把 token、账号、下载数据、manifest、运行日志、截图报告或构建产物提交进 Git。
+- 若遇到和旧聊天记录冲突的地方，以当前仓库文件为准，再用实际命令验证。
+
+## Agent 分工建议
+
+- `后端/下载 Agent`：负责 `src/anima_dataset/gui_server.py`、`download.py`、`storage.py`、`plugins/`。重点看 API 路由、预检、失败日志、断点续传、哈希记录。
+- `数据源 Agent`：负责 `sources/providers/providers.json`、`sources/catalogs/base.json`、`sources/catalogs/generators.json`。重点保证 `id` 唯一、字段能填入对应表单、默认下载量小。
+- `前端 Agent`：负责 `src/anima_dataset/web/index.html`、`app.js`、`styles.css`、`presets.js`。重点保证中文、分页、表格列、错误 toast、移动端不溢出。
+- `打包/发布 Agent`：负责 `package.json`、`electron/main.js`、`tools/build_backend.ps1`、`.gitignore`、README/SKILL 发布说明。重点保证不打进本机数据、portable 可启动、关闭后无后端残留。
+- `文档/交接 Agent`：负责 `README.md`、`SKILL.md`、`features.json`。重点记录真实验证结果、已知坑、未完成项和对外用户说明。
+
+多人并行时建议先拆分为“数据源 JSON”“下载插件”“前端 UI”“打包发布”四条线。合并前由一个 Agent 统一跑验证清单，避免各自只验证局部。
+
+## 交接模板
+
+每次 Agent 完成较大改动后，在回复或提交说明里至少交代：
+
+- 改了哪些层：数据源、后端、前端、打包、文档。
+- 影响的入口：VBS/PowerShell 启动器、Electron portable、CLI、具体 API。
+- 跑过的验证命令：至少列出 `compileall`、catalog 检查、必要的 API/前端/打包检查。
+- 没跑的验证：例如外网下载、Kaggle 凭据、受限 Hugging Face、GitHub Release 上传。
+- 遗留风险：站点限速、凭据缺失、远端数据变动、大文件下载、Windows 权限。
+- Git 状态：是否已提交、是否已推送、远端分支和提交号。
+
+## 当前已知状态
+
+- 默认服务端口是 `8422`，代码和文档不要回退到旧端口。
+- 本地源码/VBS 启动默认下载目录是 `D:\zhenzhen-asset`。
+- Electron 打包版默认下载目录是用户文档目录下的 `ZhenzhenTrainData`，这是为了避免开发机历史任务出现在用户首次启动界面。
+- 最近一次已知目录加载数量是 `1472` 个来源，provider 是 `direct`、`hf`、`wikimedia`、`ia`、`iaSearch`、`kaggle`、`zenodo`、`github`、`booru`、`local`。
+- GitHub 仓库是 `https://github.com/T8mars/TrainData-Download-T8`，本地 `main` 已配置跟踪 `origin/main`。
+- 已知本机没有 `gh` 命令；GitHub Release 附件上传不能假设可用，除非先安装/验证 `gh` 或改用其他明确授权的上传方式。
+- Windows 下这个仓库可能触发 Git `safe.directory` 或 `.git/*.lock Permission denied`，必要时使用已授权的 PowerShell 执行 Git 元数据操作。
+
+## 已知错误和处理方式
+
+- `python.exe` 指向 WindowsApps 假入口：使用 `tools/python.ps1` 的解释器探测，或设置 `ANIMA_PYTHON=C:\ProgramData\anaconda3\python.exe`。
+- 启动器一闪而过：优先检查 `tools/launch_gui.ps1`、`logs/gui_stdout.log`、`logs/gui_stderr.log`；VBS/launch.bat 不应要求用户按任意键。
+- 打包版显示开发机旧“最近任务/最近素材”：先看 `/api/status.root`，通常是读到了旧 manifest，不代表日志真的被打包；Electron 默认 root 应保持为用户文档目录 `ZhenzhenTrainData`。
+- Hugging Face 401：受限数据集需要用户先在网页申请/接受条款，再填前端 HF Token 或设置 `HF_TOKEN`。
+- GitHub Release 404：插件应先查 latest release，再查 release 列表，最后退回默认分支源码 zip/tar。
+- Internet Archive 搜索 0 条：先用预检看关键词和 include 规则，必要时放宽 include 或改用 item id。
+- Kaggle 下载失败：多数是本机没有 `~/.kaggle/kaggle.json` 或 `KAGGLE_USERNAME`/`KAGGLE_KEY`。
+- Booru 无结果/401/限速：站点公开 API 行为不稳定，只做小批量测试，不做验证码、登录墙或反爬绕过。
+
+## 需要完善但未完成
+
+- GitHub Release 自动发布：当前只能本地生成 portable，未实现稳定的 Release 上传流程。
+- 自动化测试：目前以手工命令和浏览器检查为主，缺少固定 pytest/e2e 测试套件。
+- 大文件下载队列：已有后台线程和记录，但没有完整的暂停、取消、并发队列 UI。
+- 数据源可用性巡检：目录有 1400+ 来源，但不是每个来源都做了实时下载验证；应增加批量预检报告。
+- 凭据管理：当前 token 来自表单或环境变量，没有本地加密凭据库。
+- 图标/签名：Electron 仍使用默认图标，没有代码签名，发布给普通用户时可能被 Windows SmartScreen 提醒。
+- 版本发布规范：`package.json` 是 `0.1.0`，以后发版要同步 README、features.json、SKILL.md、portable 文件名和 Git tag。
+
 ## 项目结构
 
 - `src/anima_dataset/gui_server.py`：中文 Web GUI 后端、API 路由、预检逻辑、默认下载目录。
